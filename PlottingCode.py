@@ -7,6 +7,7 @@ import glob
 folder_path = r'C:\Users\Gus\Desktop\Outgassing Code\Inhouse Tests'
 
 # Get a list of all CSV files in the folder
+#UPDATE WITH YOUR FOLDER PATH
 csv_files = glob.glob(os.path.join(folder_path, '*.csv'))
 
 # Prepare lists to store data parts for plotting
@@ -18,8 +19,12 @@ def rect(ds):
     return 2 * (ds[0] * ds[1] + ds[0] * ds[2] + ds[2] * ds[1]) / 1E6
 
 # Surface areas in m2
+
+#UPDATE THIS WITH YOUR NEW L W H
 surface_areas = [0.031685, 0.031685, rect([90, 105, 26]), rect([24, 106, 95]),rect([146,124,28]),rect([90,108,29]),rect([90,108,29]),rect([95,106,29]),rect([93,104,29]),rect([101,106,28])]
 COPV_surface_area = 3.957
+
+#UPDATE WITH NEW TEST NAME
 custom_labels = ["Control 1", "Control 2", "2hr Bake 1", "2hr Bake 2", "17hr Bake 1","17hr Bake 2","Molecular Sieve 1","Molecular Sieve 2","Low Outgassing Epoxy1","Low Outgassing Epoxy2"]
 print(len(surface_areas))
 print(len(custom_labels))
