@@ -18,9 +18,11 @@ def rect(ds):
     return 2 * (ds[0] * ds[1] + ds[0] * ds[2] + ds[2] * ds[1]) / 1E6
 
 # Surface areas in m2
-surface_areas = [0.031685, 0.031685, rect([90, 105, 26]), rect([24, 106, 95]),rect([146,124,28]),rect([90,108,29]),rect([90,108,29])]
+surface_areas = [0.031685, 0.031685, rect([90, 105, 26]), rect([24, 106, 95]),rect([146,124,28]),rect([90,108,29]),rect([90,108,29]),rect([95,106,29]),rect([93,104,29]),rect([101,106,28])]
 COPV_surface_area = 3.957
-
+custom_labels = ["Control 1", "Control 2", "2hr Bake 1", "2hr Bake 2", "17hr Bake 1","17hr Bake 2","Molecular Sieve 1","Molecular Sieve 2","Low Outgassing Epoxy1","Low Outgassing Epoxy2"]
+print(len(surface_areas))
+print(len(custom_labels))
 # Function to determine the pressure and time thresholds
 def determine_thresholds(df):
     pressure_min = df['Pressure (Torr)'].min()
@@ -56,6 +58,7 @@ def calculate_average_rate_per_area(df_part2, surface_area):
     else:
         return None
 
+
 # Process each CSV file
 for i, file in enumerate(csv_files):
     df = pd.read_csv(file)
@@ -72,31 +75,43 @@ for i, file in enumerate(csv_files):
     all_part1_data.append(df_part1)
     all_part2_data.append(df_part2)
 
-# Plot the data
-plt.figure(figsize=(14, 10))
+    # Print the lowest pressure achieved
+    lowest_pressure = df['Pressure (Torr)'].min()
+    print(f'Lowest pressure achieved for {custom_labels[i]}: {lowest_pressure:.6e} Torr')
 
-custom_labels = ["Control 1", "Control 2", "2hr Bake 1", "2hr Bake 2", "17hr Bake 1","17hr Bake 2","Molecular Sieve 1"]
+# Plot the pump down curve in the first figure
+plt.figure(figsize=(8, 6))
+
 
 # Plot all the first parts
-plt.subplot(3, 1, 1)
 for i, df_part1 in enumerate(all_part1_data):
     plt.plot(df_part1['Total Seconds'], df_part1['Pressure (Torr)'], label=custom_labels[i])
 plt.xlabel('Total Seconds')
 plt.ylabel('Pressure (Torr)')
 plt.title('Pump Down Curve')
 plt.grid(True)
+plt.legend(loc='best')
 
-# Plot all the second parts
-plt.subplot(3, 1, 2)
+plt.tight_layout(pad=3)
+plt.show()
+
+# Plot the outgassing and pressure per unit area curves in the second figure
+plt.figure(figsize=(14, 10))
+
+# Plot all the second parts - Outgassing Curve
+plt.subplot(2, 1, 1)
 for i, df_part2 in enumerate(all_part2_data):
     plt.plot(df_part2['Total Seconds'], df_part2['Pressure (Torr)'], label=custom_labels[i])
 
     # Calculate and print the average rate of outgassing per unit area
     average_rate_of_change_per_area = calculate_average_rate_per_area(df_part2, surface_areas[i])
-    if average_rate_of_change_per_area is not None:
+    average_rate_of_change = average_rate_of_change_per_area * surface_areas[i] if average_rate_of_change_per_area is not None else None
+
+    if average_rate_of_change is not None:
+        print(f'Average rate of outgassing for {custom_labels[i]}: {average_rate_of_change*1000*60*60:.6f} mTorr/hour')
         print(f'Average rate of outgassing per unit area for {custom_labels[i]}: {average_rate_of_change_per_area*1000*60*60:.6f} mTorr/(hour*m^2)')
     else:
-        print(f'Insufficient data points to calculate outgassing rate per unit area for {custom_labels[i]}')
+        print(f'Insufficient data points to calculate outgassing rate for {custom_labels[i]}')
 
 plt.xlabel('Total Seconds')
 plt.ylabel('Pressure (Torr)')
@@ -104,7 +119,7 @@ plt.title('Outgassing Curve')
 plt.grid(True)
 
 # Plot the pressure per unit area
-plt.subplot(3, 1, 3)
+plt.subplot(2, 1, 2)
 for i, df_part2 in enumerate(all_part2_data):
     plt.plot(df_part2['Total Seconds'], df_part2['Pressure per Area (Torr/m^2)'], label=custom_labels[i])
 plt.xlabel('Total Seconds')
@@ -115,5 +130,4 @@ plt.grid(True)
 plt.tight_layout(pad=3)
 plt.figlegend(custom_labels, loc='upper center', ncol=len(custom_labels))
 
-# Display the plot
 plt.show()
